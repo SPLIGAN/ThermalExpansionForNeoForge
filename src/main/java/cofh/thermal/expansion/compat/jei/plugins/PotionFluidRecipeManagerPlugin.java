@@ -51,18 +51,19 @@ public class PotionFluidRecipeManagerPlugin implements IRecipeManagerPlugin {
                 var fluidIngredient = focus.getTypedValue().getIngredient(NeoForgeTypes.FLUID_STACK);
                 if (fluidIngredient.isPresent() && fluidIngredient.get().getFluid() == POTION_FLUID.get()) {
                     FluidStack fluid = fluidIngredient.get();
-                    if (fluid.hasTag()) {
-                        ItemStack item = new ItemStack(Items.POTION);
-                        item.setTag(fluid.getTag().copy());
-                        retList.add(getDynamicBottlerPotionRecipe(item, fluid));
+                    if (!fluid.isEmpty()) {
+                        ItemStack item = PotionFluid.getItemFromPotionFluid(fluid);
+                        if (!item.isEmpty()) {
+                            retList.add(getDynamicBottlerPotionRecipe(item, fluid));
+                        }
                     }
                 }
             } else if (focus.getRole() == RecipeIngredientRole.OUTPUT) {
                 var ingredient = focus.getTypedValue().getIngredient(VanillaTypes.ITEM_STACK);
                 if (ingredient.isPresent() && ingredient.get().getItem() == Items.POTION) {
                     ItemStack item = ingredient.get();
-                    if (item.hasTag()) {
-                        FluidStack fluid = PotionFluid.getPotionFluidFromItem(BOTTLE_VOLUME, item);
+                    FluidStack fluid = PotionFluid.getPotionFluidFromItem(BOTTLE_VOLUME, item);
+                    if (!fluid.isEmpty()) {
                         retList.add(getDynamicBottlerPotionRecipe(item, fluid));
                     }
                 }
@@ -78,13 +79,15 @@ public class PotionFluidRecipeManagerPlugin implements IRecipeManagerPlugin {
         if (recipeCategory instanceof BottlerRecipeCategory) {
             if (bottlerRecipes.isEmpty()) {
                 for (Potion potion : BuiltInRegistries.POTION) {
-                    if (potion != null && potion != Potions.WATER && potion != Potions.EMPTY) {
+                    if (potion != null && potion != Potions.WATER) {
                         FluidStack fluid = PotionFluid.getPotionAsFluid(250, potion);
                         if (fluid.isEmpty()) {
                             continue;
                         }
-                        ItemStack item = new ItemStack(Items.POTION);
-                        item.setTag(fluid.getTag());
+                        ItemStack item = PotionFluid.getItemFromPotionFluid(fluid);
+                        if (item.isEmpty()) {
+                            continue;
+                        }
                         bottlerRecipes.add(getDynamicBottlerPotionRecipe(item, fluid));
                     }
                 }

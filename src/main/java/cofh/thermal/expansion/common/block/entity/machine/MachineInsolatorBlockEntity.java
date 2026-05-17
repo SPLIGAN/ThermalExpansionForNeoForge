@@ -3,7 +3,6 @@ package cofh.thermal.expansion.common.block.entity.machine;
 import cofh.core.util.helpers.FluidHelper;
 import cofh.lib.common.fluid.FluidStorageCoFH;
 import cofh.lib.common.inventory.ItemStorageCoFH;
-import cofh.lib.util.helpers.MathHelper;
 import cofh.thermal.core.common.config.ThermalCoreConfig;
 import cofh.thermal.core.common.item.SlotSealItem;
 import cofh.thermal.core.util.managers.machine.InsolatorRecipeManager;
@@ -19,7 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import static cofh.core.util.helpers.AugmentableHelper.getAttributeMod;
 import static cofh.core.util.helpers.ItemHelper.itemsEqualWithTags;
@@ -94,9 +93,7 @@ public class MachineInsolatorBlockEntity extends MachineBlockEntity {
         int decrement = itemInputCounts.size() > 1 ? itemInputCounts.get(1) : 0;
         if (decrement > 0) {
             if (catalystSlot.getItemStack().isDamageableItem()) {
-                if (catalystSlot.getItemStack().hurt(decrement, MathHelper.RANDOM, null)) {
-                    catalystSlot.modify(-1);
-                }
+                catalystSlot.getItemStack().hurtAndBreak(decrement, (net.minecraft.server.level.ServerLevel) level, null, item -> catalystSlot.modify(-1));
             } else {
                 catalystSlot.modify(-decrement);
             }

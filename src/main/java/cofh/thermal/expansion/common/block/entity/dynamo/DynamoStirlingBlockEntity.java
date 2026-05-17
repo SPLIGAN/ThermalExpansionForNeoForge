@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import static cofh.lib.api.StorageGroup.INPUT;
 import static cofh.thermal.expansion.init.registries.TExpBlockEntities.DYNAMO_STIRLING_TILE;

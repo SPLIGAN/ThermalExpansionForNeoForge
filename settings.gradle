@@ -16,3 +16,10 @@ pluginManagement {
         maven { url 'https://maven.parchmentmc.org/' }
     }
 }
+includeBuild('../ThermalCoreForNeoForge') {
+    dependencySubstitution {
+        substitute module('com.teamcofh:thermal_core') using project(':')
+    }
+}
+
+rootProject.name = 'ThermalExpansion'

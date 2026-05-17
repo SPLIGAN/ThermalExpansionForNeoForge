@@ -4,6 +4,7 @@ import cofh.thermal.expansion.client.gui.dynamo.*;
 import cofh.thermal.expansion.client.gui.machine.*;
 import cofh.thermal.expansion.common.config.ThermalDynamoConfig;
 import cofh.thermal.expansion.common.config.ThermalMachineConfig;
+import cofh.thermal.expansion.init.data.TExpDataGen;
 import cofh.thermal.expansion.init.registries.*;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -30,6 +31,8 @@ public class ThermalExpansion {
         CONFIG_MANAGER.register(modEventBus)
                 .addServerConfig(new ThermalDynamoConfig())
                 .addServerConfig(new ThermalMachineConfig());
+
+        modEventBus.register(TExpDataGen.class);
 
         modEventBus.addListener(this::capabilitySetup);
         modEventBus.addListener(this::menuScreenSetup);

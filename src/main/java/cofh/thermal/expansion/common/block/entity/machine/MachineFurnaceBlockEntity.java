@@ -14,7 +14,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import static cofh.core.util.helpers.ItemHelper.itemsEqualWithTags;
 import static cofh.lib.api.StorageGroup.*;

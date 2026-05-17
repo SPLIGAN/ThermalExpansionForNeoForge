@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import static cofh.lib.api.StorageGroup.*;
 import static cofh.lib.util.Constants.*;
@@ -67,7 +67,7 @@ public class MachineBrewerBlockEntity extends MachineBlockEntity {
             return false;
         }
         FluidStack prevFluid = renderFluid;
-        renderFluid = new FluidStack(curRecipe.getOutputFluids(this).get(0), BUCKET_VOLUME);
+        renderFluid = curRecipe.getOutputFluids(this).get(0).copyWithAmount(BUCKET_VOLUME);
         return !FluidHelper.fluidsEqual(renderFluid, prevFluid);
     }
 

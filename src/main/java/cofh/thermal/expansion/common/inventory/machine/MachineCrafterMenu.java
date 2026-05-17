@@ -14,16 +14,18 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static cofh.thermal.expansion.init.registries.TExpContainers.MACHINE_CRAFTER_CONTAINER;
@@ -31,7 +33,7 @@ import static cofh.thermal.expansion.init.registries.TExpContainers.MACHINE_CRAF
 public class MachineCrafterMenu extends BlockEntityCoFHMenu {
 
     public final MachineCrafterBlockEntity tile;
-    private final CraftingContainer craftMatrix = new TransientCraftingContainer(this, 3, 3);
+    private final TransientCraftingContainer craftMatrix = new TransientCraftingContainer(this, 3, 3);
     private final ResultContainer craftResult = new ResultContainer();
     private final Player player;
 
@@ -120,10 +122,11 @@ public class MachineCrafterMenu extends BlockEntityCoFHMenu {
         if (Utils.isServerWorld(level)) {
             ServerPlayer playerMP = (ServerPlayer) player;
             ItemStack stack = ItemStack.EMPTY;
-            Optional<RecipeHolder<CraftingRecipe>> possibleRecipe = level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftMatrix, level);
+            CraftingInput craftingInput = getCraftingInput();
+            Optional<RecipeHolder<CraftingRecipe>> possibleRecipe = level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingInput, level);
             if (possibleRecipe.isPresent()) {
-                stack = possibleRecipe.get().value().assemble(craftMatrix, level.registryAccess());
-                craftResult.setRecipeUsed(craftResult.getRecipeUsed());
+                craftResult.setRecipeUsed(possibleRecipe.get());
+                stack = possibleRecipe.get().value().assemble(craftingInput, level.registryAccess());
             }
             tile.markRecipeChanges();
             craftResult.setItem(0, stack);
@@ -139,13 +142,23 @@ public class MachineCrafterMenu extends BlockEntityCoFHMenu {
         Level level = tile.getLevel();
         ItemStack stack = ItemStack.EMPTY;
         if (level != null) {
-            Optional<RecipeHolder<CraftingRecipe>> possibleRecipe = level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftMatrix, level);
+            CraftingInput craftingInput = getCraftingInput();
+            Optional<RecipeHolder<CraftingRecipe>> possibleRecipe = level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingInput, level);
             if (possibleRecipe.isPresent()) {
                 craftResult.setRecipeUsed(possibleRecipe.get());
-                stack = possibleRecipe.get().value().assemble(craftMatrix, level.registryAccess());
+                stack = possibleRecipe.get().value().assemble(craftingInput, level.registryAccess());
             }
         }
         craftResult.setItem(0, stack);
+    }
+
+    private CraftingInput getCraftingInput() {
+
+        List<ItemStack> stacks = new ArrayList<>(9);
+        for (int i = 0; i < 9; ++i) {
+            stacks.add(craftMatrix.getItem(i));
+        }
+        return CraftingInput.of(3, 3, stacks);
     }
 
 }

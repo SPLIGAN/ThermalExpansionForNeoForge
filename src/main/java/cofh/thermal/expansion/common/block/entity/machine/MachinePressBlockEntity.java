@@ -15,7 +15,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.fluids.FluidStack;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 import static cofh.lib.api.StorageGroup.*;
@@ -70,7 +70,7 @@ public class MachinePressBlockEntity extends MachineBlockEntity {
         }
         FluidStack prevFluid = renderFluid;
         List<FluidStack> recipeOutputFluids = curRecipe.getOutputFluids(this);
-        renderFluid = recipeOutputFluids.isEmpty() ? FluidStack.EMPTY : new FluidStack(recipeOutputFluids.get(0), BUCKET_VOLUME);
+        renderFluid = recipeOutputFluids.isEmpty() ? FluidStack.EMPTY : recipeOutputFluids.get(0).copyWithAmount(BUCKET_VOLUME);
         return !FluidHelper.fluidsEqual(renderFluid, prevFluid);
     }
 

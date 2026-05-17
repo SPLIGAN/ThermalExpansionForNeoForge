@@ -14,11 +14,13 @@ import cofh.thermal.expansion.common.inventory.machine.MachineCrafterMenu;
 import cofh.thermal.lib.common.block.entity.MachineBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -27,7 +29,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.apache.commons.lang3.tuple.Pair;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -100,10 +103,11 @@ public class MachineCrafterBlockEntity extends MachineBlockEntity {
             craftMatrix.setItem(i, inventory.get(SLOT_CRAFTING_START + i));
         }
         RecipeHolder<CraftingRecipe> craftRecipe;
-        Optional<RecipeHolder<CraftingRecipe>> possibleRecipe = level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftMatrix, level);
+        CraftingInput craftingInput = getCraftingInput();
+        Optional<RecipeHolder<CraftingRecipe>> possibleRecipe = level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingInput, level);
         if (possibleRecipe.isPresent()) {
             craftRecipe = possibleRecipe.get();
-            craftResult.setItem(0, craftRecipe.value().assemble(craftMatrix, level.registryAccess()));
+            craftResult.setItem(0, craftRecipe.value().assemble(craftingInput, level.registryAccess()));
         } else {
             craftRecipe = null;
             craftResult.setItem(0, ItemStack.EMPTY);
@@ -179,11 +183,20 @@ public class MachineCrafterBlockEntity extends MachineBlockEntity {
         }
         FluidStack prevFluid = renderFluid;
         if (!fluidInputCounts.isEmpty() && fluidInputCounts.get(0) > 0) {
-            renderFluid = new FluidStack(inputTank.getFluidStack(), BUCKET_VOLUME);
+            renderFluid = inputTank.getFluidStack().copyWithAmount(BUCKET_VOLUME);
         } else {
             renderFluid = FluidStack.EMPTY;
         }
         return !FluidHelper.fluidsEqual(renderFluid, prevFluid);
+    }
+
+    private CraftingInput getCraftingInput() {
+
+        List<ItemStack> stacks = new ArrayList<>(9);
+        for (int i = 0; i < 9; ++i) {
+            stacks.add(craftMatrix.getItem(i));
+        }
+        return CraftingInput.of(3, 3, stacks);
     }
 
     // region HELPERS
@@ -242,7 +255,7 @@ public class MachineCrafterBlockEntity extends MachineBlockEntity {
         super.getConfigPacket(buffer);
 
         for (int i = SLOT_CRAFTING_START; i < SLOT_CRAFTING_START + 9; ++i) {
-            buffer.writeItem(inventory.getStackInSlot(i));
+            ItemStack.STREAM_CODEC.encode((RegistryFriendlyByteBuf) buffer, inventory.getStackInSlot(i));
         }
         return buffer;
     }
@@ -253,7 +266,7 @@ public class MachineCrafterBlockEntity extends MachineBlockEntity {
         super.handleConfigPacket(buffer);
 
         for (int i = SLOT_CRAFTING_START; i < SLOT_CRAFTING_START + 9; ++i) {
-            inventory.set(i, buffer.readItem());
+            inventory.set(i, ItemStack.STREAM_CODEC.decode((RegistryFriendlyByteBuf) buffer));
         }
         setRecipe();
         markChunkUnsaved();

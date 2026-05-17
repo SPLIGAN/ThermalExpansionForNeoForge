@@ -16,8 +16,8 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.fluids.FluidStack;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static cofh.core.client.renderer.model.ModelUtils.FLUID;
 import static cofh.lib.api.StorageGroup.INPUT;
@@ -71,7 +71,7 @@ public class DynamoMagmaticBlockEntity extends DynamoBlockEntity {
     protected boolean cacheRenderFluid() {
 
         FluidStack prevFluid = renderFluid;
-        renderFluid = new FluidStack(fuelTank.getFluidStack(), BUCKET_VOLUME);
+        renderFluid = fuelTank.getFluidStack().copyWithAmount(BUCKET_VOLUME);
         return !FluidHelper.fluidsEqual(renderFluid, prevFluid);
     }
     // endregion
@@ -83,7 +83,7 @@ public class DynamoMagmaticBlockEntity extends DynamoBlockEntity {
         return new DynamoMagmaticMenu(i, level, worldPosition, inventory, player);
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public ModelData getModelData() {
 
